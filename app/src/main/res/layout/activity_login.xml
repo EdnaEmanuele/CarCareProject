@@ -1,0 +1,159 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity"
+    android:background="@drawable/login">
+
+    <ImageView
+        android:id="@+id/login_icon"
+        android:layout_width="176dp"
+        android:layout_height="166dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="118dp"
+        android:layout_marginTop="25dp"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/login_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="208dp"
+        android:fontFamily="sans-serif"
+        android:text="Login"
+        android:textAlignment="center"
+        android:textColor="@color/DarkBlue"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:typeface="normal" />
+
+    <TextView
+        android:id="@+id/add_det_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="249dp"
+        android:text="Add your details to login"
+        android:textAlignment="center" />
+
+
+
+    <EditText
+        android:id="@+id/login_email"
+        android:layout_width="385dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/add_det_login"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/inputs"
+        android:drawableLeft="@drawable/email_icon"
+        android:ems="10"
+        android:hint="   Email"
+        android:inputType="textEmailAddress"
+        android:padding="10dp"
+        android:textColorHint="@color/LightGrey" />
+
+    <EditText
+        android:id="@+id/login_password"
+        android:layout_width="385dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/login_email"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/inputs"
+        android:drawableLeft="@drawable/password_icon"
+        android:ems="10"
+        android:hint="    Password"
+        android:inputType="textPassword"
+        android:padding="10dp"
+        android:textColorHint="@color/LightGrey" />
+
+    <Button
+        android:id="@+id/btn_sign_in"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_password"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button"
+        android:text="SIGN IN"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/White"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/linear_layout_need_new_account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_sign_in"
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#97FFFFFF"
+            android:text="Don't have an account? "
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/need_new_account_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#97FFFFFF"
+            android:text="Create a new account"
+            android:textAlignment="center"
+            android:textColor="@color/DarkBlue"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/login_alternative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linear_layout_need_new_account"
+        android:layout_marginTop="45dp"
+        android:background="#97FFFFFF"
+        android:text="Or Login with"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textStyle="bold"/>
+
+    <LinearLayout
+        android:id="@+id/linear_layout_social_media"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login_alternative"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_facebook_signin"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:src="@drawable/facebook" />
+
+        <ImageView
+            android:id="@+id/btn_google_signin"
+            android:layout_width="80dp"
+            android:layout_height="58dp"
+            android:src="@drawable/google" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>
+
+
+
