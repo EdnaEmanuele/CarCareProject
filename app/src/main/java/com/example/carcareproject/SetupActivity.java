@@ -31,6 +31,7 @@ public class SetupActivity extends AppCompatActivity {
     private DatabaseReference UserRef;
     private ProgressDialog loadingBar;
     String currentUserID;
+    final static int Gallery_Pick = 1;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,16 @@ public class SetupActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 SaveAccountSetupInfo();
+            }
+        });
+
+        ProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) { //To choose the picture from the gallery
+                Intent galleryIntent = new Intent();
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+                startActivityForResult(galleryIntent, Gallery_Pick);
             }
         });
 
