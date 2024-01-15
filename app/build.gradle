@@ -46,7 +46,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     //dependence for background profile image
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    //Android-Image-Cropper
-    api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
-
 }
+

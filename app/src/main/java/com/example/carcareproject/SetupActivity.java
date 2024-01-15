@@ -71,15 +71,8 @@ public class SetupActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode==Gallery_Pick && resultCode==RESULT_OK && data!=null){
-            Uri ImageUri = data.getData();
 
-        }
-    }
 
     private void SaveAccountSetupInfo() {
         String companyName = CompanyName.getText().toString();
