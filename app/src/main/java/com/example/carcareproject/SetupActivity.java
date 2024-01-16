@@ -68,34 +68,56 @@ public class SetupActivity extends AppCompatActivity {
             }
         });
 
-        ProfileImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { //To choose the picture from the gallery
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                startActivityForResult(Intent.createChooser(galleryIntent, "Choose your profile image"), 1);
-            }
-        });
-    }
+        ProfileImage.setOnClickListener(new View.OnClickListener() { //adds an "ear" to the image
+        @Override
+        public void onClick(View view) { //To choose the picture from the gallery
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            startActivityForResult(Intent.createChooser(galleryIntent, "Choose your profile image"), 1);
+        }
+    });
+}
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) { // select an image from the gallery
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == Activity.RESULT_OK && requestCode == Gallery_Pick) {
+        if (resultCode == Activity.RESULT_OK && requestCode == Gallery_Pick) { //If the task was completed successfully, get the image
             Uri selectedImageUri = data.getData();
             ProfileImage.setImageURI(selectedImageUri);
+
+            loadingBar.setTitle("Profile Image");
+            loadingBar.setMessage("Please wait, while we are saving your profile image...");
+            loadingBar.show();
+            loadingBar.setCanceledOnTouchOutside(true);
 
             if (selectedImageUri != null) {
                 StorageReference filePath = UserProfileImageRef.child(currentUserID + ".jpg");
                 filePath.putFile(selectedImageUri).addOnSuccessListener(taskSnapshot -> {
-                            // Imagem enviada com sucesso
-                            Toast.makeText(SetupActivity.this, "Profile image stored successfully", Toast.LENGTH_SHORT).show();
+                            // Image sent successfully
                             filePath.getDownloadUrl().addOnSuccessListener(uri -> {
-                                String downloadUrl = uri.toString();
+                                final String downloadUrl = uri.toString();
+                                UserRef.child("profileimage").setValue(downloadUrl)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()){
+                                                   // Intent selfIntent = new Intent(SetupActivity.this, SetupActivity.class);
+                                                    //startActivity(selfIntent);
+                                                    loadingBar.dismiss();
+                                                    Toast.makeText(SetupActivity.this, "Profile image stored successfully on DataBase", Toast.LENGTH_SHORT).show();
+                                                }
+                                                else {
+                                                    String message = task.getException().getMessage();
+                                                    Toast.makeText(SetupActivity.this, "Error " + message, Toast.LENGTH_SHORT).show();
+                                                    loadingBar.dismiss();
+                                                }
+                                            }
+                                        });
                             });
                         })
                         .addOnFailureListener(e -> {
-                            // Ocorreu um erro ao enviar a imagem
-                            Toast.makeText(SetupActivity.this, "Error uploading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            // An error occurred while uploading the image
+                            Toast.makeText(SetupActivity.this, "Error uploading image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            loadingBar.dismiss();
                         });
             }
         }
