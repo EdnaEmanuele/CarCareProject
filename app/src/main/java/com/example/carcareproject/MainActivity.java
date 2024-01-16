@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 //import android.widget.Toolbar; (com esse da erro)
 import androidx.appcompat.widget.Toolbar; //import correto
@@ -28,6 +31,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainActivity extends AppCompatActivity {
 
     //inicializing
@@ -37,7 +42,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView carcare;
     private Toolbar mToolbar;
     private FirebaseAuth mAuth; // We will check if the user is signed in
-    private DatabaseReference userRef;
+    private DatabaseReference UsersRef;
+    private CircleImageView  NavProfileImage;
+    private TextView NavProfileCompanyName;
+    String courrentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +53,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        userRef = FirebaseDatabase.getInstance().getReference().child("Users"); // A parte .child("Users") está referindo-se ao nó "Users". Se o nó "Users" não existir no seu banco de dados Firebase, ele será criado quando você tentar acessá-lo ou criar uma referência para ele.
-
+        courrentUserID = mAuth.getCurrentUser().getUid();
+        // A parte .child("Users") está referindo-se ao nó "Users". Se o nó "Users" não existir no seu banco de dados Firebase, ele será criado quando você tentar acessá-lo ou criar uma referência para ele.
+        UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
         mToolbar = (Toolbar) findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("CarCareHub");
@@ -56,12 +65,43 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(text);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawble_layout);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout,mToolbar,R.string.drawer_open,R.string.drawer_close); //This code creates an instance of ActionBarDrawerToggle
+        //This code creates an instance of ActionBarDrawerToggle
+        actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout,mToolbar,R.string.drawer_open,R.string.drawer_close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.menu_hamburger);
         navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        View navView = navigationView.inflateHeaderView(R.layout.navigation_header); //add elements, such as a user profile image, to the top of the navigation menu
+
+        View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
+        NavProfileImage = (CircleImageView) navView.findViewById(R.id.nav_profile_img);
+        NavProfileCompanyName = (TextView) navView.findViewById(R.id.nav_company_name);
+
+//getting elements from DB
+        UsersRef.child(courrentUserID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String company_name = snapshot.child("companyName").getValue(String.class);
+                    String image = snapshot.child("profileimage").getValue(String.class);
+
+                    NavProfileCompanyName.setText(company_name);
+
+                    // Use Glide to load the image into the CircleImageView
+                    if (image != null && !image.isEmpty()) {
+                        Glide.with(MainActivity.this)
+                                .load(image)
+                                .into(NavProfileImage);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle errors if needed
+            }
+        });
+
+
 
         navigationView.setNavigationItemSelectedListener((item -> {
                 UserMenuSelector(item);
@@ -85,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void CheckUserExistence() {
         final String current_user_id = mAuth.getCurrentUser().getUid();
-        userRef.addValueEventListener(new ValueEventListener() {
+        UsersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.hasChild(current_user_id)){
