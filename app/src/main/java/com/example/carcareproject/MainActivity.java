@@ -45,17 +45,29 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference UsersRef;
     private CircleImageView  NavProfileImage;
     private TextView NavProfileCompanyName;
-    String courrentUserID;
+    String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        courrentUserID = mAuth.getCurrentUser().getUid();
+
         // A parte .child("Users") está referindo-se ao nó "Users". Se o nó "Users" não existir no seu banco de dados Firebase, ele será criado quando você tentar acessá-lo ou criar uma referência para ele.
         UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+
+        setContentView(R.layout.activity_main);
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser == null){
+            SendUserToLoginActivity();//a method
+        }
+        else {
+            CheckUserExistence();
+        }
+
+        currentUserID = mAuth.getCurrentUser().getUid();
+
         mToolbar = (Toolbar) findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("CarCareHub");
@@ -77,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         NavProfileCompanyName = (TextView) navView.findViewById(R.id.nav_company_name);
 
 //getting elements from DB
-        UsersRef.child(courrentUserID).addValueEventListener(new ValueEventListener() {
+        UsersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -135,10 +147,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                // Handle errors if needed
             }
         });
     }
+
 
     private void SendUserToSetupActivity() {
         Intent setupIntent = new Intent(MainActivity.this, SetupActivity.class); // Create an Intent to start the SetupActivity
@@ -184,6 +197,4 @@ public class MainActivity extends AppCompatActivity {
             // Caso nenhum dos IDs correspondentes seja encontrado
         }
     }
-
-
 }
