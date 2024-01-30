@@ -17,6 +17,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 //import android.widget.Toolbar; (com esse da erro)
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private RecyclerView carcare;
     private Toolbar mToolbar;
+    private ImageButton AddNewPostBTN;
     private FirebaseAuth mAuth; // We will check if the user is signed in
     private DatabaseReference UsersRef;
     private CircleImageView  NavProfileImage;
@@ -75,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
         Spannable text = new SpannableString(getSupportActionBar().getTitle());
         text.setSpan(new ForegroundColorSpan(Color.WHITE), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         getSupportActionBar().setTitle(text);
+
+        AddNewPostBTN = (ImageButton) findViewById(R.id.add_new_post_btn);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawble_layout);
         //This code creates an instance of ActionBarDrawerToggle
@@ -116,10 +120,23 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        navigationView.setNavigationItemSelectedListener((item -> {
+        navigationView.setNavigationItemSelectedListener(item -> {
                 UserMenuSelector(item);
                 return false;
-        }));
+        });
+
+        AddNewPostBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SendUserToPostActivity();
+            }
+        });
+
+    }
+
+    private void SendUserToPostActivity() {
+        Intent addNewPostIntent = new Intent(MainActivity.this, PostActivity.class);
+        startActivity(addNewPostIntent);
     }
 
     @Override
@@ -178,8 +195,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void UserMenuSelector(MenuItem item) {
         int itemId = item.getItemId();
-
-        if (itemId == R.id.nav_profile) {
+        if (itemId == R.id.nav_post) {
+            SendUserToPostActivity();
+        } else if (itemId == R.id.nav_profile){
             Toast.makeText(this, "Profile", Toast.LENGTH_SHORT).show();
         } else if (itemId == R.id.nav_home) {
             Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
