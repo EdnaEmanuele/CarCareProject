@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+
                     String company_name = snapshot.child("companyName").getValue(String.class);
                     String image = snapshot.child("profileimage").getValue(String.class);
 
