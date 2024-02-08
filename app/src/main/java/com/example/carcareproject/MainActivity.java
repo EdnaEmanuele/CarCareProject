@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -137,7 +138,13 @@ public class MainActivity extends AppCompatActivity {
                 new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
                     @Override
                     protected void onBindViewHolder(@NonNull PostsViewHolder holder, int position, @NonNull Posts model) {
-                        // Configure ViewHolder with the data for each post
+                        // Configurar os dados do modelo nos componentes do ViewHolder
+                        holder.setCompany_na(model.getCompany_na());
+                        holder.setTime(model.getTime());
+                        holder.setDate(model.getDate());
+                        holder.setDescription(model.getDescription());
+                        holder.setProfile_img(model.getProfile_img());
+                        holder.setPost_img(model.getPost_img());
                     }
 
                     @NonNull
@@ -160,6 +167,42 @@ public class MainActivity extends AppCompatActivity {
             super(itemView);
             mView = itemView;
         }
+
+        public void setCompany_na(String company_na) {
+            TextView companyname = (TextView) mView.findViewById(R.id.post_company_name);
+            companyname.setText(company_na);
+        }
+        public void setProfile_img(String profile_img){
+            CircleImageView image = (CircleImageView) mView.findViewById(R.id.post_profile_image);
+
+            if (profile_img != null && !profile_img.isEmpty()) {
+                Glide.with(image.getContext())
+                        .load(profile_img) // URL da imagem de perfil
+                        .into(image);
+            }
+        }
+        public void setTime(String time){
+            TextView postTime = (TextView) mView.findViewById(R.id.post_time);
+            postTime.setText(time);
+        }
+        public void setDate(String date){
+            TextView postDate = (TextView) mView.findViewById(R.id.post_date);
+            postDate.setText(date);
+        }
+        public void setDescription(String description){
+            TextView postDescription = (TextView) mView.findViewById(R.id.post_description);
+            postDescription.setText(description);
+        }
+        public void setPost_img(String post_img){
+            ImageView images = (ImageView) mView.findViewById(R.id.post_IMAGENS);
+
+            if (post_img != null && !post_img.isEmpty()) {
+                Glide.with(images.getContext())
+                        .load(post_img) // URL da imagem do post
+                        .into(images);
+            }
+        }
+
     }
 
     private void SendUserToPostActivity() {

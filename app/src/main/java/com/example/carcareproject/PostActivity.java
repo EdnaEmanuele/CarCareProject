@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -140,7 +141,7 @@ public class PostActivity extends AppCompatActivity {
 
     private void StoringImageToFBStorege() {
         Calendar calForDate = Calendar.getInstance();
-        SimpleDateFormat currantDate = new SimpleDateFormat("dd-mm-yyyy");
+        SimpleDateFormat currantDate = new SimpleDateFormat("dd-MM-yyyy");
         saveCurrentDate = currantDate.format(calForDate.getTime());
 
         Calendar calForTime = Calendar.getInstance();
@@ -155,20 +156,26 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
-                    downloadUrl = task.getResult().getStorage().getDownloadUrl().toString();
-                    Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                    // Obter a URL da imagem após o upload bem-sucedido
+                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            downloadUrl = uri.toString();
+                            Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
 
-                    SavingPostInfoToFB();
-                    loadingBar.dismiss();
-
+                            // Salvar as informações do post após obter a URL da imagem
+                            SavingPostInfoToFB();
+                            loadingBar.dismiss();
+                        }
+                    });
                 } else {
                     String message = task.getException().getMessage();
                     Toast.makeText(PostActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
                     loadingBar.dismiss();
                 }
             }
-
         });
+
     }
 
     private void SavingPostInfoToFB() {
