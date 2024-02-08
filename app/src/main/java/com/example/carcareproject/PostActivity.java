@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -43,13 +44,13 @@ import java.util.HashMap;
 public class PostActivity extends AppCompatActivity {
 
     private Toolbar mtoolbar;
+    private ProgressDialog loadingBar;
     private ImageButton SelectPostImageBTN;
     private Button PostBTN;
     private EditText PostDescription;
     private  static final int Gallery_Pick = 1;
     private Uri ImageUri;
     private String Description;
-
     private String saveCurrentDate, saveCurrentTime, postRandomName, downloadUrl, current_user_id;
     private DatabaseReference UsersRef, PostRef;
     private StorageReference PostImagesReferences;
@@ -72,6 +73,7 @@ public class PostActivity extends AppCompatActivity {
         SelectPostImageBTN = (ImageButton) findViewById(R.id.select_post_imageBTN);
         PostBTN = (Button) findViewById(R.id.btn_post);
         PostDescription = (EditText) findViewById(R.id.post_description);
+        loadingBar = new ProgressDialog(this);
 
         mtoolbar =(Toolbar) findViewById(R.id.update_post_toolbar);
         setSupportActionBar(mtoolbar);
@@ -126,7 +128,13 @@ public class PostActivity extends AppCompatActivity {
             Toast.makeText(this, "Please, say something about your image...", Toast.LENGTH_SHORT).show();
         }
         else {
+            loadingBar.setTitle("Add new post");
+            loadingBar.setMessage("Please wait, while we are updating your new post...");
+            loadingBar.show();
+            loadingBar.setCanceledOnTouchOutside(true);
+
             StoringImageToFBStorege();
+
         }
     }
 
@@ -151,10 +159,12 @@ public class PostActivity extends AppCompatActivity {
                     Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
 
                     SavingPostInfoToFB();
+                    loadingBar.dismiss();
 
                 } else {
                     String message = task.getException().getMessage();
                     Toast.makeText(PostActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
+                    loadingBar.dismiss();
                 }
             }
 
@@ -166,17 +176,30 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()){
+
                     String company_name = snapshot.child("companyName").getValue().toString();
                     String profile_image = snapshot.child("profileimage").getValue().toString();
 
                     HashMap postMap = new HashMap<>();
-                    postMap.put("uid", current_user_id);
-                    postMap.put("date", saveCurrentDate);
-                    postMap.put("time", saveCurrentTime);
-                    postMap.put("description", Description);
-                    postMap.put("post_img", downloadUrl);
-                    postMap.put("profile_img", profile_image);
-                    postMap.put("company_na", company_name);
+                        postMap.put("uid", current_user_id);
+                        postMap.put("date", saveCurrentDate);
+                        postMap.put("time", saveCurrentTime);
+                        postMap.put("description", Description);
+                        postMap.put("post_img", downloadUrl);
+                        postMap.put("profile_img", profile_image);
+                        postMap.put("company_na", company_name);
+                    PostRef.child(current_user_id + postRandomName).updateChildren(postMap).addOnCompleteListener(new OnCompleteListener() {
+                                @Override
+                                public void onComplete(@NonNull Task task) {
+                                    if (task.isSuccessful()){
+                                        Toast.makeText(PostActivity.this, "New post is updated successifully", Toast.LENGTH_SHORT).show();
+                                        SendUserToMainActivity();
+                                    }
+                                    else {
+                                        Toast.makeText(PostActivity.this, "Error occured", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                 }
             }
 
