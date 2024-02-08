@@ -1,14 +1,5 @@
 package com.example.carcareproject;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,12 +8,22 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-//import android.widget.Toolbar; (com esse da erro)
-import androidx.appcompat.widget.Toolbar; //import correto
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,74 +37,72 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    //inicializing
+    // Initializing
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private RecyclerView carcare;
+    private RecyclerView postList;
     private Toolbar mToolbar;
     private ImageButton AddNewPostBTN;
-    private FirebaseAuth mAuth; // We will check if the user is signed in
-    private DatabaseReference UsersRef;
-    private CircleImageView  NavProfileImage;
+    private FirebaseAuth mAuth;
+    private DatabaseReference UsersRef, PostsRef;
+    private CircleImageView NavProfileImage;
     private TextView NavProfileCompanyName;
     String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mAuth = FirebaseAuth.getInstance();
-
-        // A parte .child("Users") está referindo-se ao nó "Users". Se o nó "Users" não existir no seu banco de dados Firebase, ele será criado quando você tentar acessá-lo ou criar uma referência para ele.
-        UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
-
         setContentView(R.layout.activity_main);
 
+        mAuth = FirebaseAuth.getInstance();
+        UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        PostsRef = FirebaseDatabase.getInstance().getReference().child("Posts");
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null){
-            SendUserToLoginActivity();//a method
-        }
-        else {
+        if (currentUser == null) {
+            SendUserToLoginActivity();
+        } else {
             CheckUserExistence();
         }
 
         currentUserID = mAuth.getCurrentUser().getUid();
 
-        mToolbar = (Toolbar) findViewById(R.id.main_page_toolbar);
+        mToolbar = findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("CarCareHub");
-        // Sets the ActionBar text color to white
         Spannable text = new SpannableString(getSupportActionBar().getTitle());
         text.setSpan(new ForegroundColorSpan(Color.WHITE), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         getSupportActionBar().setTitle(text);
 
-        AddNewPostBTN = (ImageButton) findViewById(R.id.add_new_post_btn);
+        AddNewPostBTN = findViewById(R.id.add_new_post_btn);
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawble_layout);
-        //This code creates an instance of ActionBarDrawerToggle
-        actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout,mToolbar,R.string.drawer_open,R.string.drawer_close);
+        drawerLayout = findViewById(R.id.drawble_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, mToolbar, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.menu_hamburger);
-        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView = findViewById(R.id.navigation_view);
+
+        postList = findViewById(R.id.all_users_post_list);
+        postList.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        postList.setLayoutManager(linearLayoutManager);
 
         View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
-        NavProfileImage = (CircleImageView) navView.findViewById(R.id.nav_profile_img);
-        NavProfileCompanyName = (TextView) navView.findViewById(R.id.nav_company_name);
+        NavProfileImage = navView.findViewById(R.id.nav_profile_img);
+        NavProfileCompanyName = navView.findViewById(R.id.nav_company_name);
 
-//getting elements from DB
         UsersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-
                     String company_name = snapshot.child("companyName").getValue(String.class);
                     String image = snapshot.child("profileimage").getValue(String.class);
 
                     NavProfileCompanyName.setText(company_name);
-
-                    // Use Glide to load the image into the CircleImageView
                     if (image != null && !image.isEmpty()) {
                         Glide.with(MainActivity.this)
                                 .load(image)
@@ -118,20 +117,49 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         navigationView.setNavigationItemSelectedListener(item -> {
-                UserMenuSelector(item);
-                return false;
+            UserMenuSelector(item);
+            return false;
         });
 
-        AddNewPostBTN.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SendUserToPostActivity();
-            }
-        });
+        AddNewPostBTN.setOnClickListener(view -> SendUserToPostActivity());
 
+        DisplayAllUsersPosts();
+    }
+
+    private void DisplayAllUsersPosts() {
+        FirebaseRecyclerOptions<Posts> options =
+                new FirebaseRecyclerOptions.Builder<Posts>()
+                        .setQuery(PostsRef, Posts.class)
+                        .build();
+
+        FirebaseRecyclerAdapter<Posts, PostsViewHolder> firebaseRecyclerAdapter =
+                new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
+                    @Override
+                    protected void onBindViewHolder(@NonNull PostsViewHolder holder, int position, @NonNull Posts model) {
+                        // Configure ViewHolder with the data for each post
+                    }
+
+                    @NonNull
+                    @Override
+                    public PostsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                        // Create and return a ViewHolder instance
+                        View view = getLayoutInflater().inflate(R.layout.all_posts_latout, parent, false);
+                        return new PostsViewHolder(view);
+                    }
+                };
+
+        postList.setAdapter(firebaseRecyclerAdapter);
+        firebaseRecyclerAdapter.startListening();
+    }
+
+    public static class PostsViewHolder extends RecyclerView.ViewHolder {
+        View mView;
+
+        public PostsViewHolder(View itemView) {
+            super(itemView);
+            mView = itemView;
+        }
     }
 
     private void SendUserToPostActivity() {
@@ -140,15 +168,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() { //Using mAuth it will check de user
+    protected void onStart() {
         super.onStart();
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
-
-        if(currentUser == null){
-            SendUserToLoginActivity();//a method
-        }
-        else {
+        if (currentUser == null) {
+            SendUserToLoginActivity();
+        } else {
             CheckUserExistence();
         }
     }
@@ -158,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         UsersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.hasChild(current_user_id)){
+                if (!snapshot.hasChild(current_user_id)) {
                     SendUserToSetupActivity();
                 }
             }
@@ -170,24 +195,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private void SendUserToSetupActivity() {
-        Intent setupIntent = new Intent(MainActivity.this, SetupActivity.class); // Create an Intent to start the SetupActivity
-        setupIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Configure flags to clear the activity stack
+        Intent setupIntent = new Intent(MainActivity.this, SetupActivity.class);
+        setupIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(setupIntent);
         finish();
     }
 
     private void SendUserToLoginActivity() {
-        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class); // Create an Intent to start the LoginActivity
-        loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Configure flags to clear the activity stack
+        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+        loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
         finish();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)){
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -197,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         int itemId = item.getItemId();
         if (itemId == R.id.nav_post) {
             SendUserToPostActivity();
-        } else if (itemId == R.id.nav_profile){
+        } else if (itemId == R.id.nav_profile) {
             Toast.makeText(this, "Profile", Toast.LENGTH_SHORT).show();
         } else if (itemId == R.id.nav_home) {
             Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
@@ -210,8 +234,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (itemId == R.id.nav_settings) {
             Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
         } else if (itemId == R.id.nav_logout) {
-           mAuth.signOut();
-           SendUserToLoginActivity();
+            mAuth.signOut();
+            SendUserToLoginActivity();
         } else {
             // Caso nenhum dos IDs correspondentes seja encontrado
         }
