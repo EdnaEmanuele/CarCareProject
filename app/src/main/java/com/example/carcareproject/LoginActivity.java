@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +28,11 @@ public class LoginActivity extends AppCompatActivity {
     private LinearLayout NeedNewAccountLink;
     private FirebaseAuth mAuth;
     private ProgressDialog loadingBar;
+    private ImageView googleSignBTN;
 
+
+    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
+    private boolean showOneTapUI = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         UserEmail = (EditText) findViewById(R.id.login_email);
         UserPassword = (EditText) findViewById(R.id.login_password);
         BTNlogin = (Button) findViewById(R.id.btn_sign_in);
+        googleSignBTN = (ImageView) findViewById(R.id.btn_google_signin);
 
         loadingBar = new ProgressDialog(this);
 

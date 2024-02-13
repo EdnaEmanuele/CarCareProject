@@ -1,6 +1,13 @@
 package com.example.carcareproject;
 
+
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Posts {
+    private long timestamp;
     public String uid, time, date, company_na, description, post_img, profile_img;
 
     public Posts(){
@@ -15,7 +22,17 @@ public class Posts {
         this.description = description;
         this.post_img = post_img;
         this.profile_img = profile_img;
+
+        // Convertendo time e date em um timestamp
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date postDate = dateFormat.parse(date + " " + time);
+            this.timestamp = postDate.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
+
 
     public String getUid() {
         return uid;

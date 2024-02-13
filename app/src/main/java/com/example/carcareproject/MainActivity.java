@@ -129,15 +129,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void DisplayAllUsersPosts() {
+        // Configurando as opções de recycler
         FirebaseRecyclerOptions<Posts> options =
                 new FirebaseRecyclerOptions.Builder<Posts>()
-                        .setQuery(PostsRef, Posts.class)
+                        .setQuery(PostsRef.orderByChild("timestamp"), Posts.class)
                         .build();
 
+        // Configurando o adaptador do FirebaseRecyclerAdapter
         FirebaseRecyclerAdapter<Posts, PostsViewHolder> firebaseRecyclerAdapter =
                 new FirebaseRecyclerAdapter<Posts, PostsViewHolder>(options) {
                     @Override
                     protected void onBindViewHolder(@NonNull PostsViewHolder holder, int position, @NonNull Posts model) {
+
+                        final String PostKey = getRef(position).getKey();
+
                         // Configurar os dados do modelo nos componentes do ViewHolder
                         holder.setCompany_na(model.getCompany_na());
                         holder.setTime(model.getTime());
@@ -145,20 +150,30 @@ public class MainActivity extends AppCompatActivity {
                         holder.setDescription(model.getDescription());
                         holder.setProfile_img(model.getProfile_img());
                         holder.setPost_img(model.getPost_img());
+
+                        holder.mView.setOnClickListener(new View.OnClickListener(){
+                           public void onClick (View v){
+                               Intent clickPostIntente = new Intent (MainActivity.this, ClickPostActivity.class);
+                               clickPostIntente.putExtra("PostKey", PostKey);
+                               startActivity(clickPostIntente);
+                           }
+                        });
                     }
 
                     @NonNull
                     @Override
                     public PostsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                        // Create and return a ViewHolder instance
+                        // Criar e retornar uma instância ViewHolder
                         View view = getLayoutInflater().inflate(R.layout.all_posts_latout, parent, false);
                         return new PostsViewHolder(view);
                     }
                 };
 
+        // Definindo o adaptador e inicializando a RecyclerView
         postList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
     }
+
 
     public static class PostsViewHolder extends RecyclerView.ViewHolder {
         View mView;
